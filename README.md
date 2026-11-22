@@ -42,6 +42,15 @@
 
 ## 📦 安装
 
+### 方式一：下载（推荐）
+
+前往 [Releases](https://github.com/245678000000/BatteryCare/releases/latest) 下载 `BatteryCare-x.y.z.dmg`，打开后把「电池管家」拖到「应用程序」文件夹。
+
+> 应用未经 Apple 公证。首次打开如提示“无法验证开发者”，请右键点击应用 →「打开」，或在「系统设置 → 隐私与安全性」中点击「仍要打开」。也可以在终端执行：
+> `xattr -dr com.apple.quarantine /Applications/BatteryCare.app`
+
+### 方式二：从源码构建
+
 需要 macOS 14+、Apple Silicon 和 Xcode 命令行工具（`xcode-select --install`）。
 
 ```bash
@@ -52,9 +61,9 @@ mv dist/BatteryCare.app /Applications/
 open /Applications/BatteryCare.app
 ```
 
-首次打开后点击左下角 **⚙︎ 齿轮 → 安装**，输入管理员密码安装后台辅助程序。齿轮上的小圆点为绿色即表示正在运行。
+### 首次使用
 
-> 应用使用 ad-hoc 签名。如果 macOS 提示无法打开，请在「系统设置 → 隐私与安全性」中点击「仍要打开」。
+打开后点击左下角 **⚙︎ 齿轮 → 安装**，输入管理员密码安装后台辅助程序。齿轮上的小圆点为绿色即表示正在运行。
 
 ## ⚙️ 工作原理
 
