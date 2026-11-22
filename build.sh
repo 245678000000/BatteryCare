@@ -1,6 +1,8 @@
 #!/bin/bash
 # Builds BatteryCare.app (release) into ./dist
 set -euo pipefail
+VERSION="${VERSION:-1.1.0}"
+BUILD="${BUILD:-2}"
 cd "$(dirname "$0")"
 swift build -c release
 BIN=$(swift build -c release --show-bin-path)
@@ -31,8 +33,8 @@ cat > "$APP/Contents/Info.plist" <<PL
   <key>CFBundleExecutable</key><string>BatteryCare</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.0.0</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>$VERSION</string>
+  <key>CFBundleVersion</key><string>$BUILD</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
   <key>NSHighResolutionCapable</key><true/>

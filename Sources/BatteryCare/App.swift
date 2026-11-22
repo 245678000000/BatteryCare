@@ -24,7 +24,12 @@ struct BatteryCareApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 900, height: 720)
-        .commands { CommandGroup(replacing: .newItem) {} }
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+            CommandGroup(after: .appInfo) {
+                Button("检查更新…") { AppModel.shared.selection = .other; Updater.shared.check(userInitiated: true) }
+            }
+        }
 
         MenuBarExtra(isInserted: Binding(get: { model.prefs.iconStyle != .hidden },
                                          set: { if !$0 { model.prefs.iconStyle = .hidden; model.prefs.showDock = true } })) {

@@ -19,6 +19,7 @@ final class AppModel {
     var helper: HelperStatus?
     var helperRunning = false
     var helperInstalled = false
+    var helperOutdated = false
     var history: [HistoryPoint] = []
     var selection: Page = .dashboard
     var processes: [ProcInfo] = []
@@ -98,6 +99,8 @@ final class AppModel {
         tickCount += 1
         battery = BatteryReader.read()
         helperInstalled = FileManager.default.fileExists(atPath: Paths.daemonPlist)
+        if tickCount % 12 == 1 { helperOutdated = helperInstalled && isHelperOutdated() }
+        Updater.shared.autoCheckIfNeeded()
         helper = JSONFile.load(HelperStatus.self, Paths.status)
         helperRunning = helper.map { Date().timeIntervalSince($0.updated) < 15 } ?? false
         if prefs.topUp && battery.percent >= 100 { prefs.topUp = false }
@@ -272,6 +275,14 @@ final class AppModel {
         if runAdmin("/bin/bash \(q(res + "/install-helper.sh")) \(q(res + "/batterycare-helper"))") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { self.tick() }
         }
+    }
+
+    /// True when the installed root helper differs from the one bundled with this app version.
+    private func isHelperOutdated() -> Bool {
+        guard let res = Bundle.main.resourcePath,
+              let bundled = FileManager.default.contents(atPath: res + "/batterycare-helper"),
+              let installed = FileManager.default.contents(atPath: Paths.helperBinary) else { return false }
+        return bundled != installed
     }
 
     func uninstallHelper() {

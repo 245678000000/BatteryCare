@@ -6,6 +6,7 @@ struct DashboardView: View {
     var body: some View {
         let b = model.battery
         VStack(alignment: .leading, spacing: 22) {
+            UpdateBanner()
             HelperBanner()
             hero
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 14)], spacing: 14) {

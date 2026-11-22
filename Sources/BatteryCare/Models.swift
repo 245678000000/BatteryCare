@@ -179,7 +179,17 @@ struct Prefs: Codable, Equatable {
 
     static let key = "prefs.v1"
     static func load() -> Prefs {
-        guard let d = UserDefaults.standard.data(forKey: key), let p = try? JSONDecoder().decode(Prefs.self, from: d) else { return Prefs() }
+        guard let d = UserDefaults.standard.data(forKey: key) else { return Prefs() }
+        if let p = try? JSONDecoder().decode(Prefs.self, from: d) { return p }
+        // Merge saved values over defaults (handles fields added in newer versions).
+        guard let saved = try? JSONSerialization.jsonObject(with: d) as? [String: Any],
+              let defData = try? JSONEncoder().encode(Prefs()),
+              var merged = try? JSONSerialization.jsonObject(with: defData) as? [String: Any] else { return Prefs() }
+        for (k, v) in saved where merged[k] != nil {
+            var trial = merged; trial[k] = v
+            if let td = try? JSONSerialization.data(withJSONObject: trial), (try? JSONDecoder().decode(Prefs.self, from: td)) != nil { merged = trial }
+        }
+        guard let md = try? JSONSerialization.data(withJSONObject: merged), let p = try? JSONDecoder().decode(Prefs.self, from: md) else { return Prefs() }
         return p
     }
     func save() { if let d = try? JSONEncoder().encode(self) { UserDefaults.standard.set(d, forKey: Prefs.key) } }

@@ -20,6 +20,7 @@ struct MainView: View {
         }
         .ignoresSafeArea()
         .sheet(isPresented: $m.showHelperSheet) { HelperSheet().environment(model) }
+        .sheet(isPresented: Binding(get: { Updater.shared.showSheet }, set: { Updater.shared.showSheet = $0 })) { UpdateSheet() }
         .alert("提示", isPresented: Binding(get: { model.alert != nil }, set: { if !$0 { model.alert = nil } })) {
             Button("好") {}
         } message: { Text(model.alert ?? "") }
@@ -106,7 +107,19 @@ struct SidebarItem: View {
 struct HelperBanner: View {
     @Environment(AppModel.self) private var model
     var body: some View {
-        if !model.helperRunning {
+        if model.helperRunning && model.helperOutdated {
+            HStack(spacing: 14) {
+                Image(systemName: "arrow.triangle.2.circlepath.circle.fill").font(.system(size: 24)).foregroundStyle(Color.accentBlue)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("辅助程序有新版本").font(.system(size: 14, weight: .semibold))
+                    Text("应用已更新，后台辅助程序也需要更新才能使用最新的充电控制逻辑。").font(.system(size: 12.5)).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("更新") { model.installHelper() }.buttonStyle(SoftButtonStyle(prominent: true))
+            }
+            .padding(18)
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.accentBlue.opacity(0.08)))
+        } else if !model.helperRunning {
             HStack(spacing: 14) {
                 Image(systemName: "exclamationmark.shield.fill").font(.system(size: 24)).foregroundStyle(.orange)
                 VStack(alignment: .leading, spacing: 3) {
@@ -153,7 +166,7 @@ struct HelperSheet: View {
                     Button("卸载") { model.uninstallHelper() }.buttonStyle(SoftButtonStyle(destructive: true))
                 }
                 Spacer()
-                Button(model.helperInstalled ? "重新安装" : "安装") { model.installHelper() }.buttonStyle(SoftButtonStyle(prominent: true))
+                Button(model.helperOutdated ? "更新" : model.helperInstalled ? "重新安装" : "安装") { model.installHelper() }.buttonStyle(SoftButtonStyle(prominent: true))
             }
         }
         .padding(24).frame(width: 460)

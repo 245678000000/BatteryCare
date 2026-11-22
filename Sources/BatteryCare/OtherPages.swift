@@ -328,9 +328,12 @@ struct OtherView: View {
             }
             SectionHeader(icon: "ellipsis.circle", title: "其他").padding(.top, 8)
             Card {
-                SettingRow(icon: "play", title: "开机自启", help: "登录 macOS 时自动启动电池管家。建议把应用放在“应用程序”文件夹中。") {
-                    Toggle("", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
-                        .toggleStyle(.switch).labelsHidden().controlSize(.large)
+                VStack(alignment: .leading, spacing: 18) {
+                    UpdateRow()
+                    SettingRow(icon: "play", title: "开机自启", help: "登录 macOS 时自动启动电池管家。建议把应用放在“应用程序”文件夹中。") {
+                        Toggle("", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
+                            .toggleStyle(.switch).labelsHidden().controlSize(.large)
+                    }
                 }
             }
             SectionHeader(icon: "hare", title: "快捷功能").padding(.top, 8)
