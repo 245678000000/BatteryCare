@@ -162,16 +162,41 @@ final class AppModel {
     func willTerminate() { pushControl(force: true, heartbeat: .distantPast); sleep.update(system: false, display: false) }
 
     private func prefsChanged(from old: Prefs) {
-        if old.showDock != prefs.showDock { applyDock() }
+        if old.dockPolicy != prefs.dockPolicy || old.iconStyle != prefs.iconStyle { applyDock() }
         if old.appearance != prefs.appearance { applyAppearance() }
         if old.overlayPercent != prefs.overlayPercent && overlayVisible { OverlayController.shared.show(edit: overlayEditing) }
         pushControl(force: true)
         updateSleep()
     }
 
-    func applyDock() {
-        NSApp.setActivationPolicy(prefs.showDock ? .regular : .accessory)
-        if !prefs.showDock { DispatchQueue.main.async { NSApp.activate(ignoringOtherApps: true) } }
+    /// The main settings window (titled, not a panel — excludes the menu bar popover and the overlay HUD).
+    static func isMainWindow(_ w: NSWindow) -> Bool { w.styleMask.contains(.titled) && !(w is NSPanel) }
+    static var mainWindowOpen: Bool { NSApp.windows.contains { isMainWindow($0) && $0.isVisible } }
+
+    /// Shows the Dock icon only when the policy (and, for .whenOpen, an open window) calls for it.
+    /// Without a menu bar icon the Dock icon is always kept so the app stays reachable.
+    func applyDock(windowOpen: Bool? = nil) {
+        let open = windowOpen ?? Self.mainWindowOpen
+        let show: Bool
+        if prefs.iconStyle == .hidden { show = true }
+        else {
+            switch prefs.dockPolicy {
+            case .always: show = true
+            case .never: show = false
+            case .whenOpen: show = open
+            }
+        }
+        let target: NSApplication.ActivationPolicy = show ? .regular : .accessory
+        guard NSApp.activationPolicy() != target else { return }
+        NSApp.setActivationPolicy(target)
+        if open { DispatchQueue.main.async { NSApp.activate(ignoringOtherApps: true) } }
+    }
+
+    /// Brings up the main window (used by the menu bar panel and URL handling).
+    func showMainWindow(_ openWindow: () -> Void) {
+        applyDock(windowOpen: true)
+        openWindow()
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     func applyAppearance() {
@@ -290,6 +315,9 @@ final class AppModel {
         if runAdmin("/bin/bash \(q(res + "/uninstall-helper.sh"))") { tick() }
     }
 
+    /// Fully quits (as opposed to ⌘Q / Dock quit, which only hides to the menu bar).
+    func quitCompletely() { AppDelegate.reallyQuit = true; NSApp.terminate(nil) }
+
     func uninstallEverything() {
         let a = NSAlert()
         a.messageText = "删除电池管家？"
@@ -299,7 +327,7 @@ final class AppModel {
         guard a.runModal() == .alertFirstButtonReturn else { return }
         if helperInstalled { guard let res = Bundle.main.resourcePath, runAdmin("/bin/bash \(q(res + "/uninstall-helper.sh"))") else { return } }
         UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
-        NSWorkspace.shared.recycle([Bundle.main.bundleURL]) { _, _ in NSApp.terminate(nil) }
+        NSWorkspace.shared.recycle([Bundle.main.bundleURL]) { _, _ in self.quitCompletely() }
     }
 
     func resetDefaults() {

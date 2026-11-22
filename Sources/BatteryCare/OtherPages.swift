@@ -289,9 +289,14 @@ struct OtherView: View {
         VStack(alignment: .leading, spacing: 20) {
             ToggleRow(icon: "gauge.with.dots.needle.67percent", title: "硬件电池百分比",
                       help: "显示电池芯片报告的真实电量（当前容量 ÷ 满充容量），而不是 macOS 经过平滑处理的百分比。", isOn: $m.prefs.hardwarePercent)
-            ToggleRow(icon: "dock.rectangle", title: "显示程序坞图标", help: "关闭后电池管家只出现在菜单栏中。", isOn: Binding(
-                get: { m.prefs.showDock },
-                set: { v in m.prefs.showDock = v; if !v && m.prefs.iconStyle == .hidden { m.prefs.iconStyle = .app } }))
+            SettingRow(icon: "dock.rectangle", title: "程序坞图标",
+                       help: "“窗口打开时显示”：关闭窗口、在程序坞中选择退出或按 ⌘Q 时，电池管家只会隐藏到菜单栏继续运行，不占用程序坞。要完全退出，请使用菜单栏面板里的“退出”或按 ⌥⌘Q。") {
+                Picker("", selection: Binding(get: { m.prefs.dockPolicy }, set: { v in
+                    m.prefs.dockPolicy = v
+                    if v == .never && m.prefs.iconStyle == .hidden { m.prefs.iconStyle = .app }
+                })) { ForEach(DockPolicy.allCases, id: \.self) { Text($0.title).tag($0) } }
+                .labelsHidden().fixedSize()
+            }
             ToggleRow(icon: "drop", title: "降低透明度", help: "侧边栏使用纯色背景，而不是半透明毛玻璃。", isOn: $m.prefs.reduceTransparency)
             SettingRow(icon: "circle.lefthalf.filled", title: "外观模式") {
                 HStack(spacing: 18) {

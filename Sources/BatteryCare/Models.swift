@@ -25,6 +25,9 @@ enum Page: String, CaseIterable, Identifiable {
     ]
 }
 
+enum DockPolicy: String, Codable, CaseIterable { case whenOpen, always, never
+    var title: String { switch self { case .whenOpen: "窗口打开时显示"; case .always: "始终显示"; case .never: "从不显示" } } }
+
 enum DisplaySleep: String, Codable, CaseIterable { case mirror, never
     var title: String { self == .mirror ? "镜像 macOS" : "从不关闭" } }
 
@@ -170,7 +173,7 @@ struct Prefs: Codable, Equatable {
     var menuItems: [MenuItemKind] = []
     // other
     var hardwarePercent = false
-    var showDock = true
+    var dockPolicy: DockPolicy = .whenOpen
     var reduceTransparency = false
     var appearance: Appearance = .system
     var ledMode: LEDMode = .system

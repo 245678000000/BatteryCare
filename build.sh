@@ -11,6 +11,7 @@ rm -rf "$APP"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/BatteryCare" "$APP/Contents/MacOS/BatteryCare"
 cp "$BIN/batterycare-helper" "$APP/Contents/Resources/"
 cp Resources/*.sh "$APP/Contents/Resources/"
+mkdir -p "$APP/Contents/Resources/zh_CN.lproj" "$APP/Contents/Resources/zh-Hans.lproj"
 
 if [ ! -f .build/AppIcon.icns ]; then
   swift Tools/make_icon.swift .build/icon.png
@@ -27,6 +28,8 @@ cat > "$APP/Contents/Info.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
+  <key>CFBundleDevelopmentRegion</key><string>zh_CN</string>
+  <key>CFBundleLocalizations</key><array><string>zh_CN</string><string>zh-Hans</string></array>
   <key>CFBundleName</key><string>电池管家</string>
   <key>CFBundleDisplayName</key><string>电池管家</string>
   <key>CFBundleIdentifier</key><string>com.batterycare.app</string>

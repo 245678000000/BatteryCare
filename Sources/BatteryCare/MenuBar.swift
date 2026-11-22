@@ -90,7 +90,7 @@ struct MenuBarSettingsView: View {
                         ForEach(IconStyle.allCases, id: \.self) { s in
                             Chip(icon: s.icon, title: s.title, selected: m.prefs.iconStyle == s) {
                                 m.prefs.iconStyle = s
-                                if s == .hidden { m.prefs.showDock = true }
+                                if s == .hidden && m.prefs.dockPolicy == .never { m.prefs.dockPolicy = .whenOpen }
                             }
                         }
                     }
@@ -181,11 +181,9 @@ struct MenuBarPanel: View {
             }
             Divider()
             HStack {
-                Button("打开电池管家") {
-                    openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true)
-                }
+                Button("打开电池管家") { model.showMainWindow { openWindow(id: "main") } }
                 Spacer()
-                Button("退出") { NSApp.terminate(nil) }
+                Button("退出") { model.quitCompletely() }.help("完全退出电池管家（⌥⌘Q）")
             }
             .buttonStyle(.borderless)
         }

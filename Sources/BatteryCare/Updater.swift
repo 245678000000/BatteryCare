@@ -127,6 +127,7 @@ final class Updater {
         showSheet = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             NSApp.windows.forEach { w in w.sheets.forEach { w.endSheet($0) } }
+            AppDelegate.reallyQuit = true
             NSApp.terminate(nil)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
