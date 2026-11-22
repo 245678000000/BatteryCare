@@ -240,6 +240,8 @@ final class AppModel {
         case "calibrate": perform(.calibrate)
         case "limit": if let v = arg.flatMap(Int.init) { perform(.setLimit, value: v) }
         case "lowpower": perform(arg == "off" ? .lowPowerOff : .lowPowerOn)
+        case "page":
+            if let p = arg.flatMap(Page.init(rawValue:)) { selection = p; NSApp.activate(ignoringOtherApps: true) }
         case "enable": prefs.enabled = true
         case "disable": prefs.enabled = false
         default: break
